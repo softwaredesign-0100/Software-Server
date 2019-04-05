@@ -16,23 +16,27 @@ context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
 context.load_cert_chain("./1_www.qidu1998.cn_bundle.crt", keyfile="./2_www.qidu1998.cn.key")
 '''
 
+
 def db_submit_per_info(data):
     print(data)
     print('there is submit_per_info')
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
-    cur = db.cursor()    
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
+    cur = db.cursor()
     if data["identify"] == "teacher":
         sql = "update TeacherInfo set t_name = '%s', t_workplace = '%s', \
             t_introduction = '%s', t_email = '%s',\
-             t_direction = '%s', t_phone = '%s' where t_account = '%s'" % (data['name'], data['workplace'], data['introduction'], \
-                 data['email'], data['direction'], data['phone'], data['account'])
+             t_direction = '%s', t_phone = '%s' where t_account = '%s'" % (
+        data['name'], data['workplace'], data['introduction'], \
+        data['email'], data['direction'], data['phone'], data['account'])
     else:
         # sql = "update StudentInfo set s_name = '%s', s_introduction = '%s', s_classroom = '%s',\
         # s_number = '%s', s_email = '%s', s_direction = '%s', s_phone = '%s' where s_account = '%s'" % (\
-            # data['name'], data['introduction'], data['classroom'], data['number'],\
-            # data['email'], data['direction'], data['phone'], data['account'])
-        sql = "update StudentInfo set s_name = '%s', s_classroom = '%s', s_number = '%s', s_email = '%s', s_direction = '%s', s_phone = '%s', s_department = '%s' where s_account = '%s'" % (data['name'], data['classroom'], data['number'], data['email'], data['direction'], data['phone'], data['department'], data['account'])
+        # data['name'], data['introduction'], data['classroom'], data['number'],\
+        # data['email'], data['direction'], data['phone'], data['account'])
+        sql = "update StudentInfo set s_name = '%s', s_classroom = '%s', s_number = '%s', s_email = '%s', s_direction = '%s', s_phone = '%s', s_department = '%s' where s_account = '%s'" % (
+        data['name'], data['classroom'], data['number'], data['email'], data['direction'], data['phone'],
+        data['department'], data['account'])
     print('submit_per_info sql: ', sql)
 
     try:
@@ -48,6 +52,7 @@ def db_submit_per_info(data):
         db.close()
     print('sub per info finish ')
     return status, 0
+
 
 # def db_submit_per_info(data):
 #     print(data)
@@ -82,20 +87,19 @@ def db_submit_per_info(data):
 #     return status, 0
 
 
-
 def db_get_t_info(data):
     print('there is get t info')
     print(data)
-    db = pymysql    
+    db = pymysql
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
-    cur = db.cursor()    
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
+    cur = db.cursor()
 
     account = data['account']
 
     sql = "select t_name, t_phone, t_email, t_workplace, t_direction, t_introduction from TeacherInfo where t_account = '%s'" % account
 
-    print('get t info sql: %s' %sql)
+    print('get t info sql: %s' % sql)
 
     results = {}
     try:
@@ -106,7 +110,7 @@ def db_get_t_info(data):
             'phone': info[1],
             'email': info[2],
             'workplace': info[3],
-            'direction':info[4],
+            'direction': info[4],
             'introduction': info[5]
         }
     except Exception as e:
@@ -122,16 +126,16 @@ def db_get_t_info(data):
 
 def db_get_s_info(data):
     print('there is get s info')
-    db = pymysql    
+    db = pymysql
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
-    cur = db.cursor()    
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
+    cur = db.cursor()
 
     account = data['account']
 
     sql = "select s_name, s_phone, s_email, s_direction, s_number, s_classroom, s_department from StudentInfo where s_account = '%s'" % account
 
-    print('get s info sql: %s' %sql)
+    print('get s info sql: %s' % sql)
 
     try:
         cur.execute(sql)
@@ -153,10 +157,10 @@ def db_get_s_info(data):
         db.close()
     return status, results
 
-    
+
 def db_sign_up(data):
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
     cur = db.cursor()
     if data["identify"] == "teacher":
         tablename = "TeacherInfo"
@@ -166,9 +170,10 @@ def db_sign_up(data):
         tablename = "StudentInfo"
         id_name = "s_account"
         password_name = "s_password"
-    sql = "insert into {0} ({1}, {2}) values ('{3}', '{4}')".format(tablename, id_name, password_name, data['account'], data['password'])
+    sql = "insert into {0} ({1}, {2}) values ('{3}', '{4}')".format(tablename, id_name, password_name, data['account'],
+                                                                    data['password'])
     print(sql)
-    try:    
+    try:
         cur.execute(sql)
         db.commit()
     except:
@@ -182,9 +187,10 @@ def db_sign_up(data):
     print(status)
     return status
 
+
 def db_sign_in(data):
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
     cur = db.cursor()
     if data["identify"] == "teacher":
         tablename = "TeacherInfo"
@@ -196,9 +202,10 @@ def db_sign_in(data):
         id_name = "s_account"
         password_name = "s_password"
         name_name = "s_name"
-    sql = "select {0}, {1} from {2} where {3} = '{4}'".format(password_name, name_name, tablename, id_name, data["account"])
+    sql = "select {0}, {1} from {2} where {3} = '{4}'".format(password_name, name_name, tablename, id_name,
+                                                              data["account"])
     print(sql)
-    try:    
+    try:
         cur.execute(sql)
         results = cur.fetchall()
         print(results)
@@ -232,11 +239,12 @@ def db_sign_in(data):
     print('sign in statue: %d' % status)
     return status
 
+
 def db_change_password(data):
     print('prepare change password')
     print(data)
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
     cur = db.cursor()
     if data["identify"] == "teacher":
         tablename = "TeacherInfo"
@@ -262,9 +270,10 @@ def db_change_password(data):
         if password != data["old_password"]:
             status = 403
         else:
-            sql = "update {0} set {1} = '{2}' where {3} = '{4}'".format(tablename, password_name, data["new_password"], id_name, data["account"])
+            sql = "update {0} set {1} = '{2}' where {3} = '{4}'".format(tablename, password_name, data["new_password"],
+                                                                        id_name, data["account"])
             print(sql)
-            try:    
+            try:
                 cur.execute(sql)
                 db.commit()
             except:
@@ -276,9 +285,10 @@ def db_change_password(data):
     print(status)
     return status
 
+
 def db_person_info(data):
     status = 201
-    db = pymysql.connect("127.0.0.1","root","123456","Software_Project" )
+    db = pymysql.connect("127.0.0.1", "root", "123456", "Software_Project")
     cur = db.cursor()
     if data["identify"] == "teacher":
         tablename = "TeacherInfo"
@@ -289,22 +299,22 @@ def db_person_info(data):
         name_direction = "t_direction"
         name_email = "t_email"
         name_phone = "t_phone"
-        name_workplace =  "t_workplace"
-        name_introduction =  "t_introduction"
+        name_workplace = "t_workplace"
+        name_introduction = "t_introduction"
         sql = "update {0} set {1} = '{2}', \
             {3} = '{4}', {5} = '{6}', {7} = '{8}', \
             {9} = '{10}', {11} = '{12}', {13} = '{14}', \
-            {15} = '{16}', where {17} = '{18}'".format(\
-                tablename, \
-                name_name, data['name'] , \
-                name_number, data['number'] , \
-                name_department, data['department'] , \
-                name_direction, data['direction'] , \
-                name_email, data['email'] , \
-                name_phone, data['phone'] , \
-                name_workplace, data['workplace'] , \
-                name_introduction, data['introduction'], \
-                account_name, data["account"])
+            {15} = '{16}', where {17} = '{18}'".format( \
+            tablename, \
+            name_name, data['name'], \
+            name_number, data['number'], \
+            name_department, data['department'], \
+            name_direction, data['direction'], \
+            name_email, data['email'], \
+            name_phone, data['phone'], \
+            name_workplace, data['workplace'], \
+            name_introduction, data['introduction'], \
+            account_name, data["account"])
         print(sql)
     else:
         tablename = "StudentInfo"
@@ -316,25 +326,25 @@ def db_person_info(data):
         name_classroom = "s_classroom"
         name_email = "s_email"
         name_phone = "s_phone"
-        name_workplace =  "s_workplace"
-        name_introduction =  "s_introduction"        
+        name_workplace = "s_workplace"
+        name_introduction = "s_introduction"
         sql = "update {0} set {1} = '{2}', \
             {3} = '{4}', {5} = '{6}', {7} = '{8}', \
             {9} = '{10}', {11} = '{12}', {13} = '{14}', \
-            {15} = '{16}', {17} = '{18}',  where {19} = '{20}'".format(\
-                tablename, \
-                name_name, data['name'] , \
-                name_number, data['number'] , \
-                name_department, data['department'] , \
-                name_direction, data['direction'] , \
-                name_classroom, data['classroom'] , \
-                name_email, data['email'] , \
-                name_phone, data['phone'] , \
-                name_workplace, data['workplace'] , \
-                name_introduction, data['introduction'], \
-                account_name, data["account"])
+            {15} = '{16}', {17} = '{18}',  where {19} = '{20}'".format( \
+            tablename, \
+            name_name, data['name'], \
+            name_number, data['number'], \
+            name_department, data['department'], \
+            name_direction, data['direction'], \
+            name_classroom, data['classroom'], \
+            name_email, data['email'], \
+            name_phone, data['phone'], \
+            name_workplace, data['workplace'], \
+            name_introduction, data['introduction'], \
+            account_name, data["account"])
         print(sql)
-    try:    
+    try:
         cur.execute(sql)
         db.commit()
     except:
@@ -347,9 +357,10 @@ def db_person_info(data):
     print(status)
     return status
 
+
 def db_show_t_info(data):
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
     cur = db.cursor()
     if data["identify"] == "teacher":
         tablename = "TeacherInfo"
@@ -361,7 +372,7 @@ def db_show_t_info(data):
         password_name = "s_password"
     sql = "select {0} from {1} where {2} = '{3}'".format(password_name, tablename, id_name, data["account"])
     print(sql)
-    try:    
+    try:
         cur.execute(sql)
         results = cur.fetchall()
         print(results)
@@ -383,10 +394,11 @@ def db_show_t_info(data):
     print(status)
     return status
 
+
 def db_t_release_reservation(data):
     print(data)
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
     cur = db.cursor()
     tablename = "TeacherInfo"
     id_name = "t_account"
@@ -398,10 +410,10 @@ def db_t_release_reservation(data):
     tips_name = "tips"
     current_teacher_name = ""
 
-    sql = "select {0} from {1} where {2} = '{3}'".format(\
+    sql = "select {0} from {1} where {2} = '{3}'".format( \
         teacher_name, tablename, id_name, data['account'])
     print(sql)
-    try:    
+    try:
         cur.execute(sql)
         results = cur.fetchall()
     except Exception as e:
@@ -424,11 +436,12 @@ def db_t_release_reservation(data):
         print(reservation)
         print(type(reservation))
         sql = "insert into {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}) \
-        values ('{8}', '{9}', '{10}', '{11}', '{12}', '{13}', '{14}')".format(\
+        values ('{8}', '{9}', '{10}', '{11}', '{12}', '{13}', '{14}')".format( \
             tablename, id_name, teacher_name, week_name, weekday_name, segment_name, place_name, tips_name, \
-            data['account'], current_teacher_name, reservation['week'], reservation['weekday'], reservation['segment'], reservation['place'], reservation['tips'])
+            data['account'], current_teacher_name, reservation['week'], reservation['weekday'], reservation['segment'],
+            reservation['place'], reservation['tips'])
         print(sql)
-        try:    
+        try:
             cur.execute(sql)
             db.commit()
         except Exception as e:
@@ -440,18 +453,19 @@ def db_t_release_reservation(data):
     print(status)
     return status
 
+
 def db_s_release_reservation(data):
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
     cur = db.cursor()
 
-    sql = "update ReservationInfo set s_account = '%s', reason = '%s', s_name = '%s' where serial = %d" 
+    sql = "update ReservationInfo set s_account = '%s', reason = '%s', s_name = '%s' where serial = %d"
 
     sql_get_name = "select s_name from StudentInfo where s_account = '%s'" % data['account']
 
     try:
         cur.execute(sql_get_name)
-        
+
         name = cur.fetchall()
         print('results: ', name)
         name = name[0][0]
@@ -465,7 +479,7 @@ def db_s_release_reservation(data):
         status = 200
     finally:
         db.close()
-    return status 
+    return status
     # tablename = "ReservationInfo"
     # id_name = "s_account"
     # serial_name = "serial"
@@ -487,11 +501,11 @@ def db_s_release_reservation(data):
     # finally:
     #     db.close()
     # print(status)
-    return status
+
 
 def db_seek_reservation(data):
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
     cur = db.cursor()
     tablename = "ReservationInfo"
     id_name_t = "t_account"
@@ -557,14 +571,15 @@ def db_seek_reservation(data):
     # finally:
     #     db.close()
     # print(status)
-    return status, results
+
 
 def db_t_view_reservation(data):
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
     cur = db.cursor()
 
-    sql = "select week, weekday, segment, place, reason, s_name from ReservationInfo where t_account = '%s'" % data['account']
+    sql = "select week, weekday, segment, place, reason, s_name from ReservationInfo where t_account = '%s'" % data[
+        'account']
 
     results = {}
     try:
@@ -582,7 +597,7 @@ def db_t_view_reservation(data):
             })
     except Exception as e:
         status = 500
-    else:   
+    else:
         status = 200
     finally:
         db.close()
@@ -656,7 +671,7 @@ def db_t_view_reservation(data):
 
 def db_s_view_reservation(data):
     status = 201
-    db = pymysql.connect("167.179.72.48","root","root","Software_Project" )
+    db = pymysql.connect("167.179.72.48", "root", "root", "Software_Project")
     cur = db.cursor()
     tablename = "ReservationInfo"
     week_name = "week"
@@ -669,11 +684,11 @@ def db_s_view_reservation(data):
     tips_name = "tips"
     results = []
 
-    sql = "select {}, {}, {}, {}, {}, {}, {} from {} where {} = '{}'".format(\
+    sql = "select {}, {}, {}, {}, {}, {}, {} from {} where {} = '{}'".format( \
         week_name, weekday_name, segment_name, reason_name, place_name, tips_name, t_name_name, \
         tablename, s_account_name, data['account'])
     print(sql)
-    try:    
+    try:
         cur.execute(sql)
         r_Info = cur.fetchall()
     except Exception as e:
@@ -682,7 +697,7 @@ def db_s_view_reservation(data):
     else:
         for r_info in r_Info:
             if len(r_info) != 0:
-                item={}
+                item = {}
                 item[week_name] = r_info[0]
                 item[weekday_name] = r_info[1]
                 item[segment_name] = r_info[2]
@@ -697,6 +712,7 @@ def db_s_view_reservation(data):
     print(status)
     return status, results
 
+
 @app.route("/sign_up", methods=['POST', 'GET'])
 async def sign_up(request):
     data = request.json
@@ -704,11 +720,13 @@ async def sign_up(request):
     status = db_sign_up(data)
     return json({"status": status})
 
+
 @app.route("/sign_in", methods=['POST', 'GET'])
 async def sign_in(request):
     data = request.json
     status = db_sign_in(data)
     return json({"status": status})
+
 
 @app.route("/change_password", methods=['POST', 'GET'])
 async def change_password(request):
@@ -716,11 +734,13 @@ async def change_password(request):
     status = db_change_password(data)
     return json({"status": status})
 
+
 @app.route("/person_info", methods=['POST', 'GET'])
 async def person_info(request):
     data = request.json
     status = db_person_info(data)
     return json({"status": status})
+
 
 @app.route("/show_t_info", methods=['POST', 'GET'])
 async def show_t_info(request):
@@ -728,23 +748,27 @@ async def show_t_info(request):
     status = db_show_t_info(data)
     return json({"status": status})
 
+
 @app.route("/t_release_reservation", methods=['POST', 'GET'])
 async def t_release_reservation(request):
     data = request.json
     status = db_t_release_reservation(data)
     return json({"status": status})
 
+
 @app.route("/s_release_reservation", methods=['POST', 'GET'])
 async def s_release_reservation(request):
     data = request.json
     status = db_s_release_reservation(data)
     return json({"status": status})
-    
+
+
 @app.route("/seek_reservation", methods=['POST', 'GET'])
 async def seek_reservation(request):
     data = request.json
     status, results = db_seek_reservation(data)
     return json({"status": status, "results": results})
+
 
 @app.route("/t_view_reservation", methods=['POST', 'GET'])
 async def t_view_reservation(request):
@@ -752,11 +776,13 @@ async def t_view_reservation(request):
     status, results = db_t_view_reservation(data)
     return json({"status": status, "results": results})
 
+
 @app.route("/s_view_reservation", methods=['POST', 'GET'])
 async def s_view_reservation(request):
     data = request.json
     status, results = db_s_view_reservation(data)
     return json({"status": status, "results": results})
+
 
 @app.route("/get_t_info", methods=["POST", "GET"])
 async def get_t_info(request):
@@ -764,11 +790,13 @@ async def get_t_info(request):
     status, results = db_get_t_info(data)
     return json({'status': status, 'info': results})
 
+
 @app.route("/get_s_info", methods=["POST", "GET"])
 async def get_s_info(request):
     data = request.json
     status, results = db_get_s_info(data)
     return json({'status': status, 'info': results})
+
 
 @app.route('submit_per_info', methods=["POST", 'GET'])
 async def submit_per_info(request):
@@ -776,10 +804,8 @@ async def submit_per_info(request):
     status, results = db_submit_per_info(data)
     return json({'status': status, 'results': results})
 
+
 if __name__ == "__main__":
-    #app.run(host="0.0.0.0", port=3328, ssl=context)
+    # app.run(host="0.0.0.0", port=3328, ssl=context)
     app.run(host="0.0.0.0", port=3328)
-#nohup python3 /home/zhaodd/sanic/sanic_test.py >> /home/zhaodd/sanic/output.log 2>&1 &
-
-
-
+# nohup python3 /home/zhaodd/sanic/sanic_test.py >> /home/zhaodd/sanic/output.log 2>&1 &
