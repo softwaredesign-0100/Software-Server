@@ -20,7 +20,10 @@ from config import *
 
 def c_sign_up(data):
     sql = "insert into %s (account, password) values ('%s', '%s');"
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev_mdy
     baser = DatabaseDeal()
     results, status = baser.insert_like(sql=sql % (map_table[data['identify']], data['account'], data['password']))
     print('sign in status: %d' % status)
@@ -51,12 +54,20 @@ def c_sign_in(data):
         status = 404  # no such user
     elif results.iloc[0]['password'] != data['password']:
         status = 403  # password error
+<<<<<<< HEAD
 
 
     sql_is_name = "select name from %s where account = '%s' and name is not null;"
     results, _ = baser.select(sql=sql_is_name % (map_table[data['identify']], data['account']))
     if results.shape[0] == 0:
         status = 401
+=======
+    else:
+        sql_is_name = "select name from %s where account = '%s' and name is not null;"
+        results, _ = baser.select(sql=sql_is_name % (map_table[data['identify']], data['account']))
+        if results.shape[0] == 0:
+            status = 401
+>>>>>>> dev_mdy
     print('sign in status: %d' % status)
     return results, status
 

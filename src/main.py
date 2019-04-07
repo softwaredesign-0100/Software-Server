@@ -35,6 +35,22 @@ async def change_password(request):
     return json({'status': status})
 
 
+<<<<<<< HEAD
+=======
+@app.route('/release_exam', methods=['POST', 'GET'])
+async def release_exam(request):
+    data = request.json
+    results, status = t_release_exam(data)
+    return json({'status': status})
+
+
+@app.route('/seek_exams', methods=['POST', 'GET'])
+async def seek_exams(request):
+    data = request.json
+    exams, status = s_seek_exams(data)
+    return {'status': status, 'exams': exams}
+
+>>>>>>> dev_mdy
 # ------------------------------------------- teacher --------------------------------------------#
 
 @app.route('/t_view_own_info', methods=['POST', 'GET'])

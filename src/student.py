@@ -158,4 +158,43 @@ def s_s_view_reservation(data):
     ress = []
     for i in range(0, results.shape[0]):
         ress.append(results.iloc[i].to_dict())
+<<<<<<< HEAD
     return ress, status
+=======
+    return ress, status
+
+
+'''
+学生查询考试情况
+
+:params
+    data: {
+        
+    }
+
+:return 
+    {
+        status: '',
+        exams: {
+            {
+                start: '',
+                end: '',
+                t_name: '',
+                place: '',
+                e_name: '' // 考试名称
+            }
+        }
+    }
+'''
+
+
+def s_seek_exams(data):
+    print('s_seek_exams data: ', data)
+    sql = "select concat(serial), start, end, t_name, e_name, place from ExamInfo;"
+    baser = DatabaseDeal()
+    results, status = baser.select(sql=sql)
+    exams = []
+    for i in range(0, results.shape[0]):
+        exams.append(results.iloc[i].to_dict())
+    return exams, status
+>>>>>>> dev_mdy

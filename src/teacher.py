@@ -130,7 +130,53 @@ def t_t_view_reservation(data):
     ress = []
     for i in range(0, temp_ress.shape[0]):
         ress.append(temp_ress.iloc[i].to_dict())
+<<<<<<< HEAD
     print('ress: ', ress)
     return ress, status
 
 
+=======
+    print('t view reservation ress: ', ress)
+    return ress, status
+
+
+'''
+教师发布考试信息
+
+
+:params
+    data: {
+        account: '',
+        week: '',
+        weekday: '',
+        e_name: '',
+        start: '',
+        end: '',
+        place: ''
+    }
+
+:return 
+    {
+        status: ''
+    }
+'''
+
+
+def t_release_exam(data):
+    print('t_release_exam: ', data)
+
+    sql = "insert into ExamInfo (t_account, e_name, week, weekday, start, end, place) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s');"
+    baser = DatabaseDeal()
+    results, status = baser.insert_like(
+        sql=sql % (
+            data['account'], data['e_name'], data['week'], data['weekday'],
+            data['start'].replace('T', ' ').replace('.000Z', ''), data['end'].replace('T', '').replace('.000Z', ''),
+            data['place']))
+
+    if status == 200:
+        # 更新，向表中插入姓名
+        sql_update = "update ExamInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ExamInfo.t_account) where t_name is null;"
+        results, status = baser.insert_like(sql=sql_update)
+    print('t_release_exam status: ', status, '\n\tresults: ', results)
+    return results, status
+>>>>>>> dev_mdy
