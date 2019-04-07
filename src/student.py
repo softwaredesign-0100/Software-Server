@@ -54,13 +54,18 @@ def s_s_view_own_info(data):
 
 
 def s_s_submit_own_info(data):
+    print('s submit own info data: ', data)
     sql = "update StudentInfo set name = '%s', number = '%s', email = '%s', phone = '%s', department = '%s', " \
           "classroom = '%s', direction = '%s' where account = '%s';"
     baser = DatabaseDeal()
     results, status = baser.insert_like(sql=sql % (
         data['name'], data['number'], data['email'], data['phone'], data['department'], data['classroom'],
         data['direction'], data['account']))
-    print(results, status)
+
+    if status == 200:
+        sql = "update ReservationInfo set s_name = (select name from StudentInfo where account = '%s') where s_account = '%s';"
+        results, status = baser.insert_like(sql=sql % (data['account'], data['account']))
+    print('s submit own info: status: ', status, 'results: ', results)
     return results, status
 
 
@@ -87,7 +92,8 @@ def s_s_submit_own_info(data):
 
 
 def s_seek_reservation(data):
-    sql = "select week, weekday, segment, place, t_name, tips, concat(serial) as serial from ReservationInfo where s_account is null;"
+    sql = "select week, weekday, segment, place, t_name, tips, concat(serial) as serial, concat(is_canceled) as is_canceled, " \
+          "concat(is_finished) as is_finished from ReservationInfo where s_account is null and is_canceled != '3';"
     baser = DatabaseDeal()
     temp_ress, status = baser.select(sql=sql)
     print('temp_ress: ', temp_ress)
@@ -152,15 +158,13 @@ def s_s_release_reservation(data):
 
 
 def s_s_view_reservation(data):
-    sql = "select week, weekday, segment, concat(serial) as serial, t_name, place, reason, tips from ReservationInfo where s_account = '%s';"
+    sql = "select week, weekday, segment, concat(serial) as serial, t_name, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished from ReservationInfo where s_account = '%s';"
     baser = DatabaseDeal()
     results, status = baser.select(sql % (data['account']))
     ress = []
     for i in range(0, results.shape[0]):
         ress.append(results.iloc[i].to_dict())
-<<<<<<< HEAD
-    return ress, status
-=======
+
     return ress, status
 
 
@@ -253,12 +257,11 @@ def s_view_own_exams(data):
     print('s view own exams data: ', data)
     sql = "select concat(ExamInfo.serial), week, weekday, e_name, t_name, start, end, place from ExamInfo inner join StudentExam on StudentExam.e_serial = ExamInfo.serial where StudentExam.s_account = '%s';"
     baser = DatabaseDeal()
-    results, status = baser.select(sql=sql%(data['account']))
+    results, status = baser.select(sql=sql % (data['account']))
 
     exams = []
-    for i in range(0,results.shape[0]):
+    for i in range(0, results.shape[0]):
         exams.append(results.iloc[i].to_dict())
     print('s view own exams status: ', status, 'exams: ', exams)
 
     return exams, status
->>>>>>> dev_mdy

@@ -50,12 +50,17 @@ def t_t_view_own_info(data):
 
 
 def t_t_submit_own_info(data):
+    print('t submit own info data: ', data)
     sql = "update TeacherInfo set name = '%s', introduction = '%s', direction = '%s', email = '%s', phone = '%s', " \
           "workplace = '%s' where account = '%s';"
     baser = DatabaseDeal()
     results, status = baser.insert_like(sql=sql % (
         data['name'], data['introduction'], data['direction'], data['email'], data['phone'], data['workplace'],
         data['account']))
+    if status == 200:
+        sql = "update ReservationInfo set t_name = (select name from TeacherInfo where account = '%s') where t_account = '%s';"
+        results, status = baser.insert_like(sql=sql % (data['account'], data['account']))
+
     return results, status
 
 
@@ -124,25 +129,18 @@ def t_t_release_reservation(data):
 
 
 def t_t_view_reservation(data):
-    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished from ReservationInfo where t_account = '%s';"
+    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished, concat(serial) as serial from ReservationInfo where t_account = '%s';"
     baser = DatabaseDeal()
     temp_ress, status = baser.select(sql=sql % data['account'])
     ress = []
     for i in range(0, temp_ress.shape[0]):
         ress.append(temp_ress.iloc[i].to_dict())
-<<<<<<< HEAD
-    print('ress: ', ress)
-    return ress, status
-
-
-=======
     print('t view reservation ress: ', ress)
     return ress, status
 
 
 '''
 教师发布考试信息
-
 
 :params
     data: {
@@ -152,7 +150,8 @@ def t_t_view_reservation(data):
         e_name: '',
         start: '',
         end: '',
-        place: ''
+        place: '',
+        tips: ''
     }
 
 :return 
@@ -165,13 +164,13 @@ def t_t_view_reservation(data):
 def t_release_exam(data):
     print('t_release_exam: ', data)
 
-    sql = "insert into ExamInfo (t_account, e_name, week, weekday, start, end, place) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s');"
+    sql = "insert into ExamInfo (t_account, e_name, week, weekday, start, end, place, tips) values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');"
     baser = DatabaseDeal()
     results, status = baser.insert_like(
         sql=sql % (
             data['account'], data['e_name'], data['week'], data['weekday'],
             data['start'].replace('T', ' ').replace('.000Z', ''), data['end'].replace('T', '').replace('.000Z', ''),
-            data['place']))
+            data['place'], data['tips']))
 
     if status == 200:
         # 更新，向表中插入姓名
@@ -179,4 +178,43 @@ def t_release_exam(data):
         results, status = baser.insert_like(sql=sql_update)
     print('t_release_exam status: ', status, '\n\tresults: ', results)
     return results, status
->>>>>>> dev_mdy
+
+
+'''
+教师查看自己发布的考试内容
+
+:params
+    data: {
+        account: '' // 教师
+    }
+
+:return 
+    {
+        status: '',
+        exams: [
+            {
+                'name': '', // 考试名
+                'place': '',
+                start: '',
+                end: '',
+                week: '',
+                weekday: '',
+                tips: ''
+            }
+        ]
+    }
+
+'''
+
+
+def t_view_own_release_exams(data):
+    print('t view own release exams data: ', data)
+    baser = DatabaseDeal()
+    sql = "select e_name as name, start, end, week, weekday, place, tips from ExamInfo where t_account = '%s';"
+    results, status = baser.select(sql=sql % data['account'])
+
+    exams = []
+    for i in range(0, results.shape[0]):
+        exams.append(results.iloc[i].to_dict())
+    print('t view own release exams status: ', status, 'results', results)
+    return exams, status
