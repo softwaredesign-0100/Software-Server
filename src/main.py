@@ -35,21 +35,7 @@ async def change_password(request):
     return json({'status': status})
 
 
-@app.route('/release_exam', methods=['POST', 'GET'])
-async def release_exam(request):
-    data = request.json
-    results, status = t_release_exam(data)
-    return json({'status': status})
-
-
-@app.route('/seek_exams', methods=['POST', 'GET'])
-async def seek_exams(request):
-    data = request.json
-    exams, status = s_seek_exams(data)
-    return {'status': status, 'exams': exams}
-
 # ------------------------------------------- teacher --------------------------------------------#
-
 @app.route('/t_view_own_info', methods=['POST', 'GET'])
 async def t_view_own_info(request):
     data = request.json
@@ -76,6 +62,13 @@ async def t_view_reservation(request):
     data = request.json
     results, status = t_t_view_reservation(data)
     return json({'status': status, 'ress': results})
+
+
+@app.route('/release_exam', methods=['POST', 'GET'])
+async def release_exam(request):
+    data = request.json
+    results, status = t_release_exam(data)
+    return json({'status': status})
 
 
 # ------------------------------------------- student --------------------------------------------#
@@ -112,6 +105,27 @@ async def s_view_reservation(request):
     data = request.json
     results, status = s_s_view_reservation(data)
     return json({'status': status, 'ress': results})
+
+
+@app.route('/seek_exams', methods=['POST', 'GET'])
+async def seek_exams(request):
+    data = request.json
+    results, status = s_seek_exams(data)
+    return json({'status': status, 'exams': results})
+
+
+@app.route('/add_exam', methods=['POST', 'GET'])
+async def add_exam(request):
+    data = request.json
+    results, status = s_add_exam(data)
+    return json({'status': status})
+
+
+@app.route('/view_own_exams', methods=['POST', 'GET'])
+async def view_own_exams(request):
+    data = request.json
+    results, status = s_view_own_exams(data)
+    return json({'status': status, 'exams': results})
 
 
 if __name__ == '__main__':
