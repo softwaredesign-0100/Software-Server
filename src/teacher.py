@@ -163,7 +163,9 @@ def t_release_exam(data):
     baser = DatabaseDeal()
     results, status = baser.insert_like(
         sql=sql % (
-            data['account'], data['e_name'], data['week'], data['weekday'], data['start'], data['end'], data['place']))
+            data['account'], data['e_name'], data['week'], data['weekday'],
+            data['start'].replace('T', ' ').replace('.000Z', ''), data['end'].replace('T', '').replace('.000Z', ''),
+            data['place']))
 
     if status == 200:
         # 更新，向表中插入姓名
