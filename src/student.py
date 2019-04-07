@@ -190,11 +190,75 @@ def s_s_view_reservation(data):
 
 def s_seek_exams(data):
     print('s_seek_exams data: ', data)
-    sql = "select concat(serial), start, end, t_name, e_name, place from ExamInfo;"
+    sql = "select concat(serial) as serial, start, end, t_name, e_name, place, week, weekday from ExamInfo;"
     baser = DatabaseDeal()
     results, status = baser.select(sql=sql)
     exams = []
     for i in range(0, results.shape[0]):
         exams.append(results.iloc[i].to_dict())
+    print('s seek exams exams: ', exams)
+    return exams, status
+
+
+'''
+学生添加考试信息
+:params
+    data: {
+        account: '', // student
+        serial: '',  // exam
+    }
+
+:return 
+    {
+        status: ''
+    }
+'''
+
+
+def s_add_exam(data):
+    print('s add exam data: ', data)
+    sql = "insert into StudentExam(s_account, e_serial) values ('%s', '%s');"
+    baser = DatabaseDeal()
+    results, status = baser.insert_like(sql=sql % (data['account'], data['serial']))
+    print('s add exam status: ', status)
+    return results, status
+
+
+'''
+学生查看自己的考试信息
+:params
+    data: {
+        account: '' // student
+    }
+
+:return 
+    {
+        status: '',
+        exams: [
+            {
+                start: '',
+                end: '',
+                t_name: '',
+                e_name: '',
+                place: '',
+                serial: ''
+            },
+            ...
+        ]
+    }
+'''
+
+
+def s_view_own_exams(data):
+    print('s view own exams data: ', data)
+    sql = "select concat(ExamInfo.serial), week, weekday, e_name, t_name, start, end, place from ExamInfo inner join StudentExam on StudentExam.e_serial = ExamInfo.serial where StudentExam.s_account = '%s';"
+    baser = DatabaseDeal()
+    results, status = baser.select(sql=sql%(data['account']))
+
+    exams = []
+    for i in range(0,results.shape[0]):
+        exams.append(results.iloc[i].to_dict())
+    print('s view own exams status: ', status, 'exams: ', exams)
+
     return exams, status
 >>>>>>> dev_mdy

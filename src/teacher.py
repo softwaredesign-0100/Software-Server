@@ -124,7 +124,7 @@ def t_t_release_reservation(data):
 
 
 def t_t_view_reservation(data):
-    sql = "select week, weekday, segment, s_name as student, place, reason, tips from ReservationInfo where t_account = '%s';"
+    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished from ReservationInfo where t_account = '%s';"
     baser = DatabaseDeal()
     temp_ress, status = baser.select(sql=sql % data['account'])
     ress = []
