@@ -1,0 +1,6 @@
+.idea/
+*.zip
+node_modules/
+*.ipynb
+sanic_test.py
+
