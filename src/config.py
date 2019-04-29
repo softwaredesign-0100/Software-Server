@@ -14,3 +14,12 @@ map_table = {
     'teacher': 'TeacherInfo',
     'student': 'StudentInfo'
 }
+
+map_field = {
+    'teacher': 't_account',
+    'student': 's_account'
+}
+
+mail_host = 'smtp.163.com'
+mail_user = '17863110068@163.com'
+mail_password = 'mdy0204'

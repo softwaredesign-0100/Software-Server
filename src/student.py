@@ -158,13 +158,14 @@ def s_s_release_reservation(data):
 
 
 def s_s_view_reservation(data):
-    sql = "select week, weekday, segment, concat(serial) as serial, t_name, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished from ReservationInfo where s_account = '%s';"
+    print('s view reservation data: ', data)
+    sql = "select week, weekday, segment, concat(serial) as serial, t_name, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished from ReservationInfo where s_account = '%s' and is_canceled != 3 and is_finished = 0 order by week asc, weekday asc, segment asc;"
     baser = DatabaseDeal()
     results, status = baser.select(sql % (data['account']))
     ress = []
     for i in range(0, results.shape[0]):
         ress.append(results.iloc[i].to_dict())
-
+    print('s view reservation ress: ', ress, 'status: ', status)
     return ress, status
 
 
@@ -255,7 +256,7 @@ def s_add_exam(data):
 
 def s_view_own_exams(data):
     print('s view own exams data: ', data)
-    sql = "select concat(ExamInfo.serial), week, weekday, e_name, t_name, start, end, place from ExamInfo inner join StudentExam on StudentExam.e_serial = ExamInfo.serial where StudentExam.s_account = '%s';"
+    sql = "select concat(ExamInfo.serial) as serial, week, weekday, e_name, t_name, start, end, place from ExamInfo inner join StudentExam on StudentExam.e_serial = ExamInfo.serial where StudentExam.s_account = '%s' and StudentExam.is_finished = '0' order by week asc, weekday asc, start asc;"
     baser = DatabaseDeal()
     results, status = baser.select(sql=sql % (data['account']))
 
@@ -265,3 +266,83 @@ def s_view_own_exams(data):
     print('s view own exams status: ', status, 'exams: ', exams)
 
     return exams, status
+
+
+'''
+12 完成考试
+
+接口名
+    s_finish_exam
+
+:params 
+    data: {
+        account: '',
+        serial: ''
+    }
+
+:return
+    {
+        status
+    }
+'''
+
+
+def s_s_finish_exam(data):
+    print('s s finish exam data: ', data)
+    baser = DatabaseDeal()
+    sql = "update StudentExam set is_finished = '1' where s_account = '%s' and e_serial = '%s';"
+    try:
+        results, status = baser.insert_like(sql % (data['account'], data['serial']))
+    except Exception as e:
+        results, status = None, 500
+        print('s s finish exam error!', e)
+    print('s s finish exam results: ', results, 'status: ', status)
+    return results, status
+
+
+'''
+15 获取已完成的考试信息
+接口名
+    s_view_finish_exam
+
+:params
+    data: {
+        account: ''
+    }
+
+:return 
+    {
+        status: '',
+        exams: [
+            {
+                start: '',
+                end: '',
+                t_name: '',
+                e_name: '',
+                place: '',
+                serial: ''
+            },
+            ...
+        ]
+    }
+'''
+
+
+def s_s_view_finish_exam(data):
+    print('s s view finish exam data: ', data)
+    baser = DatabaseDeal()
+    sql = "select concat(ExamInfo.serial) as serial, week, weekday, e_name, t_name, start, end, place from" \
+          " ExamInfo inner join StudentExam on StudentExam.e_serial = ExamInfo.serial where StudentExam.s_account = '%s'" \
+          " and StudentExam.is_finished = '1' order by week asc, weekday asc, start asc;"
+    results, status = baser.select(sql=sql % (data['account']))
+
+    exams = []
+    for i in range(0, results.shape[0]):
+        exams.append(results.iloc[i].to_dict())
+    print('s s view finish exams status: ', status, 'exams: ', exams)
+    return exams, status
+
+
+
+
+

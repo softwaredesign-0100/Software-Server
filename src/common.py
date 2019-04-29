@@ -2,6 +2,8 @@ from sanic import Sanic
 import pandas as pd
 from deal_database import DatabaseDeal
 from config import *
+import smtplib
+from email.mime.text import MIMEText
 
 '''
 :param
@@ -128,7 +130,7 @@ def c_initiate_cancel(data):
             is_canceled = 1
 
     sql = "update ReservationInfo set is_canceled = '%s', reason = '%s' where serial = '%s';"
-    results, status = baser.insert_like(sql=sql %(is_canceled, data['reason'], data['serial']))
+    results, status = baser.insert_like(sql=sql % (is_canceled, data['reason'], data['serial']))
     print('c initiate cancel: status = %d | is_canceled = %d' % (status, is_canceled))
     return results, status
 
@@ -157,3 +159,219 @@ def c_ensure_cancel(data):
     print('c ensure cancel status: ', status, 'results: ', results)
     return results, status
 
+
+'''
+
+:params
+    data: {
+        email: '',
+        code: ''
+    }
+
+:return
+    {
+        status:
+    }
+'''
+
+
+def c_send_email(data):
+    print('c send email data: ', data)
+    verify_code = data['code']
+    receivers = [data['email']]
+
+    codes = '您的验证码是<h3>%s</h3>请不要泄露哦' % verify_code
+    message = MIMEText(codes, 'plain', 'utf-8')
+    message['Subject'] = '校园预约系统邮箱验证'
+    message['From'] = mail_user
+    message['To'] = receivers[0]
+
+    try:
+        smtpObj = smtplib.SMTP()
+        smtpObj.connect(mail_host, 25)
+        smtpObj.login(user=mail_user, password=mail_password)
+        smtpObj.sendmail(from_addr=mail_user, to_addrs=receivers[0], msg=message.as_string())
+        smtpObj.quit()
+        status = 200
+    except Exception as e:
+        print('send email fail', e)
+        status = 500
+
+    print('c send eamil status: ', status)
+    return 0, status
+
+
+'''
+:params
+    data: {
+        identify: ''
+        account: '',
+        ok: true
+    }
+
+:return 
+    {
+        status: 
+    }
+'''
+
+
+def c_verify_email(data):
+    print('c verify email data: ', data)
+    baser = DatabaseDeal()
+    sql = "insert into %s set email_verified = '1' where account = '%s';"
+    try:
+        results, status = baser.insert_like(sql % (map_table[data['identify']], data['account']))
+    except Exception as e:
+        print('update faile!', e)
+        results, status = 0, 500
+    return results, status
+
+
+'''
+:params 
+    data: {
+        identify: '',
+        account: ''
+    }
+
+:return
+    {
+        verify_email: true or false,
+        verify_phone: true,
+        status: 
+    }
+'''
+
+
+def c_get_verify_info(data):
+    print('c get verify info data: ', data)
+    baser = DatabaseDeal()
+    sql = "select email_verified as verify_email, phone_verified as verify_phone from '%s' where account = '%s';"
+
+    try:
+        r, status = baser.select(sql=sql% (map_table[data['identify']], data['account']))
+        results = {
+            'verify_email': r.iloc[0]['verify_email'],
+            'phone_verified': r.iloc[0]['phone_verified']
+        }
+    except Exception as e:
+        results, status = None, 500
+        print('select finish', e)
+
+    return results, status
+
+
+'''
+:params 
+    data: {
+        identify: '',
+        account: ''
+    }
+
+:return 
+    {
+        status: '',
+        results: [
+            {
+                week: ''
+                weekday: '', 
+                reason: '',
+                tips: '',
+                segment: ''
+                t_name: ''
+                s_name: '',
+                place: ''
+            },
+            ...
+        ]
+    }
+'''
+
+
+def c_view_his_res(data):
+    print('c view his res data: ', data)
+    baser = DatabaseDeal()
+    sql = "select week, weekday, segment, reason, tips, t_name, s_name, place, concat(serial) as serial " \
+          "from ReservationInfo where %s = '%s' and is_finished = '1';"
+    try:
+        r, status = baser.select(sql % (map_field[data['identify']],data['account']))
+        results = []
+        for i in range(0, r.shape[0]):
+            results.append(r.iloc[i].to_dict())
+    except Exception as e:
+        status = 500
+        results = 0
+        print('c view his results error!', e)
+
+    print('c view his res results: ', results, 'status: ', status)
+    return results, status
+
+
+'''
+11 删除考试
+
+接口名
+    delete_exam
+
+:params 
+    data: {
+        account: '',
+        serial: '',
+        identify: ''
+    }
+
+:return 
+    {
+        status: ''
+    }
+'''
+
+
+def c_delete_exam(data):
+    print('c delete exam data: ', data)
+    baser = DatabaseDeal()
+
+    if data['identify'] == 'student':
+        sql = "delete from StudentExam where s_account = '%s' and e_serial = '%s';"
+    if data['identify'] == 'teacher':
+        sql = "delete from ExamInfo where t_account = '%s' and serial = '%s'"
+
+    try:
+        results, status = baser.insert_like(sql% (data['account'], data['serial']))
+    except Exception as e:
+        print('c delete exam error!', e)
+        results, status = None, 500
+    return results, status
+
+
+'''
+10 完成预约
+
+接口名
+    finish_res
+
+:params 
+    data: {
+        account: '',
+        serial: ''
+    }
+
+:return 
+    {
+        status: ''
+    }
+'''
+
+
+def c_finish_res(data):
+    print('s s finish res data: ', data)
+    baser = DatabaseDeal()
+    sql = "update ReservationInfo set is_finished = '1' where serial = '%s';"
+    try:
+        results, status = baser.insert_like(sql % (data['serial']))
+    except Exception as e:
+        print('s s finish res error!', e)
+
+    print('s s finish res results: ', results, 'status: ', status)
+    return results, status

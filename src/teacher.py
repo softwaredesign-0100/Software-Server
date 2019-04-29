@@ -129,7 +129,7 @@ def t_t_release_reservation(data):
 
 
 def t_t_view_reservation(data):
-    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished, concat(serial) as serial from ReservationInfo where t_account = '%s';"
+    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished, concat(serial) as serial from ReservationInfo where t_account = '%s' and is_canceled != 3 and is_finished = 0;"
     baser = DatabaseDeal()
     temp_ress, status = baser.select(sql=sql % data['account'])
     ress = []
@@ -174,7 +174,7 @@ def t_release_exam(data):
 
     if status == 200:
         # 更新，向表中插入姓名
-        sql_update = "update ExamInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ExamInfo.t_account) where t_name is null;"
+        sql_update = "update ExamInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ExamInfo.t_account) where t_name = '';"
         results, status = baser.insert_like(sql=sql_update)
     print('t_release_exam status: ', status, '\n\tresults: ', results)
     return results, status
@@ -210,7 +210,7 @@ def t_release_exam(data):
 def t_view_own_release_exams(data):
     print('t view own release exams data: ', data)
     baser = DatabaseDeal()
-    sql = "select e_name as name, start, end, week, weekday, place, tips from ExamInfo where t_account = '%s';"
+    sql = "select e_name as name, start, end, week, weekday, place, tips, concat(serial) as serial from ExamInfo where t_account = '%s' order by week asc, weekday asc, start asc;"
     results, status = baser.select(sql=sql % data['account'])
 
     exams = []
@@ -218,3 +218,44 @@ def t_view_own_release_exams(data):
         exams.append(results.iloc[i].to_dict())
     print('t view own release exams status: ', status, 'results', results)
     return exams, status
+
+
+'''
+
+14 修改发布的考试
+
+接口名
+    edit_exam
+
+:params 
+    data: {
+        account: '',
+        week: '',
+        weekday: '',
+        e_name: '',
+        start: '',
+        end: '',
+        place: '',
+        serial: ''
+    }
+
+:return 
+    {
+        status: ''
+    }
+'''
+
+
+def t_edit_exam(data):
+    print('t edit exam data: ', data)
+    baser = DatabaseDeal()
+    sql = "update ExamInfo set e_name = '%s', start = '%s', end = '%s', place = '%s', week = '%s', weekday = '%s', tips = '%s' where serial = '%s';"
+    try:
+        results, status = baser.insert_like(sql % (
+        data['e_name'], data['start'], data['end'], data['place'], data['week'], data['weekday'], data['tips'],
+        data['serial']))
+    except Exception as e:
+        results, status = None, 500
+        print('t edit exam error!', e)
+
+    return results, status
