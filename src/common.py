@@ -1,9 +1,10 @@
 from sanic import Sanic
 import pandas as pd
-from deal_database import DatabaseDeal
+from utils import *
 from config import *
 import smtplib
 from email.mime.text import MIMEText
+
 
 '''
 :param
@@ -129,9 +130,13 @@ def c_initiate_cancel(data):
         else:
             is_canceled = 1
 
+    # 更改状态
     sql = "update ReservationInfo set is_canceled = '%s', reason = '%s' where serial = '%s';"
     results, status = baser.insert_like(sql=sql % (is_canceled, data['reason'], data['serial']))
     print('c initiate cancel: status = %d | is_canceled = %d' % (status, is_canceled))
+
+    # 发送邮件
+
     return results, status
 
 
@@ -161,7 +166,6 @@ def c_ensure_cancel(data):
 
 
 '''
-
 :params
     data: {
         email: '',
@@ -176,26 +180,34 @@ def c_ensure_cancel(data):
 
 
 def c_send_email(data):
+    sender = SendEmail()
     print('c send email data: ', data)
     verify_code = data['code']
     receivers = [data['email']]
 
     codes = '您的验证码是<h3>%s</h3>请不要泄露哦' % verify_code
-    message = MIMEText(codes, 'plain', 'utf-8')
-    message['Subject'] = '校园预约系统邮箱验证'
-    message['From'] = mail_user
-    message['To'] = receivers[0]
 
     try:
-        smtpObj = smtplib.SMTP()
-        smtpObj.connect(mail_host, 25)
-        smtpObj.login(user=mail_user, password=mail_password)
-        smtpObj.sendmail(from_addr=mail_user, to_addrs=receivers[0], msg=message.as_string())
-        smtpObj.quit()
-        status = 200
+        status = sender.send_email(receivers=receivers, subject='校园预约系统邮箱验证', data=codes)
     except Exception as e:
-        print('send email fail', e)
         status = 500
+        print('c send email error! ', e)
+
+    # message = MIMEText(codes, 'plain', 'utf-8')
+    # message['Subject'] = '校园预约系统邮箱验证'
+    # message['From'] = mail_user
+    # message['To'] = receivers[0]
+    #
+    # try:
+    #     smtpObj = smtplib.SMTP()
+    #     smtpObj.connect(mail_host, 25)
+    #     smtpObj.login(user=mail_user, password=mail_password)
+    #     smtpObj.sendmail(from_addr=mail_user, to_addrs=receivers[0], msg=message.as_string())
+    #     smtpObj.quit()
+    #     status = 200
+    # except Exception as e:
+    #     print('send email fail', e)
+    #     status = 500
 
     print('c send eamil status: ', status)
     return 0, status
@@ -286,6 +298,7 @@ def c_get_verify_info(data):
             ...
         ]
     }
+    
 '''
 
 
@@ -371,7 +384,7 @@ def c_finish_res(data):
     try:
         results, status = baser.insert_like(sql % (data['serial']))
     except Exception as e:
-        print('s s finish res error!', e)
+        print('s s finish res error!',  e)
 
     print('s s finish res results: ', results, 'status: ', status)
     return results, status

@@ -1,5 +1,5 @@
 from config import *
-from deal_database import DatabaseDeal
+from utils import DatabaseDeal
 
 """
 :params:

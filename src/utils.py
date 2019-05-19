@@ -1,6 +1,8 @@
 import pandas as pd
 import pymysql
 import config
+import smtplib
+from email.mime.text import MIMEText
 
 
 class DatabaseDeal:
@@ -49,3 +51,26 @@ class DatabaseDeal:
         finally:
             con.close()
         return None, status
+
+
+class SendEmail:
+    def __int__(self):
+        pass
+
+    def send_email(self, receivers, subject, data):
+        message = MIMEText(data, 'plain', 'utf-8')
+        message['Subject'] = subject
+        message['From'] = config.mail_user
+        message['To'] = receivers[0]
+
+        try:
+            smtpObj = smtplib.SMTP()
+            smtpObj.connect(config.mail_host, 25)
+            smtpObj.login(user=config.mail_user, password=config.mail_password)
+            smtpObj.sendmail(from_addr=config.mail_user, to_addrs=receivers[0], msg=message.as_string())
+            smtpObj.quit()
+            status = 200
+        except Exception as e:
+            print('send email fail', e)
+            status = 500
+        return status

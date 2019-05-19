@@ -1,6 +1,6 @@
 import pandas as pd
 import pymysql
-from deal_database import DatabaseDeal
+from utils import DatabaseDeal
 from config import *
 from sanic.response import json
 
