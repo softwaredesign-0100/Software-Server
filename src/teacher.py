@@ -120,6 +120,7 @@ def t_t_release_reservation(data):
                     student: '***',
                     place: '宋健一号院北***',
                     reason: '答疑',
+                    score: str,
                     tips: '',
                 },
                 ...
@@ -129,7 +130,7 @@ def t_t_release_reservation(data):
 
 
 def t_t_view_reservation(data):
-    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished, concat(serial) as serial from ReservationInfo where t_account = '%s' and is_canceled != 3 and is_finished = 0;"
+    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished, concat(serial) as serial, concat(score) as score from ReservationInfo where t_account = '%s' and is_canceled != 3 and is_finished = 0;"
     baser = DatabaseDeal()
     temp_ress, status = baser.select(sql=sql % data['account'])
     ress = []

@@ -45,17 +45,21 @@ def c_sign_up(data):
 
 
 def c_sign_in(data):
+    print('c sign in data: ', data)
     sql = "select password from %s where account = '%s'"
     baser = DatabaseDeal()
     results, status = baser.select(sql=sql % (map_table[data['identify']], data['account']))
 
     if results.shape[0] == 0:
         status = 404  # no such user
+        return results, status
     elif results.iloc[0]['password'] != data['password']:
         status = 403  # password error
+        return results, status
 
     sql_is_name = "select name from %s where account = '%s' and name is not null;"
     results, _ = baser.select(sql=sql_is_name % (map_table[data['identify']], data['account']))
+    
     if results.shape[0] == 0:
         status = 401
     else:
@@ -293,7 +297,8 @@ def c_get_verify_info(data):
                 segment: ''
                 t_name: ''
                 s_name: '',
-                place: ''
+                place: ''，
+                score: ''
             },
             ...
         ]
@@ -305,7 +310,7 @@ def c_get_verify_info(data):
 def c_view_his_res(data):
     print('c view his res data: ', data)
     baser = DatabaseDeal()
-    sql = "select week, weekday, segment, reason, tips, t_name, s_name, place, concat(serial) as serial " \
+    sql = "select week, weekday, segment, reason, tips, t_name, s_name, place, concat(serial) as serial, concat(score) as score" \
           "from ReservationInfo where %s = '%s' and is_finished = '1';"
     try:
         r, status = baser.select(sql % (map_field[data['identify']],data['account']))
@@ -367,7 +372,8 @@ def c_delete_exam(data):
 :params 
     data: {
         account: '',
-        serial: ''
+        serial: '',
+        score: int,
     }
 
 :return 
@@ -380,11 +386,10 @@ def c_delete_exam(data):
 def c_finish_res(data):
     print('s s finish res data: ', data)
     baser = DatabaseDeal()
-    sql = "update ReservationInfo set is_finished = '1' where serial = '%s';"
+    sql = "update ReservationInfo set is_finished = '1', score = '%d' where serial = '%s';"
     try:
-        results, status = baser.insert_like(sql % (data['serial']))
+        results, status = baser.insert_like(sql % (data['score'], data['serial']))
     except Exception as e:
         print('s s finish res error!',  e)
-
     print('s s finish res results: ', results, 'status: ', status)
     return results, status
