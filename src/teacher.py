@@ -98,7 +98,7 @@ def t_t_release_reservation(data):
             sql_insert % (data['account'], res['week'], res['weekday'], res['segment'], res['place'], res['tips']))
         if status == 201:
             return results, status
-    sql_update = "update ReservationInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ReservationInfo.t_account) where t_name is null;"
+    sql_update = "update ReservationInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ReservationInfo.t_account), t_email = (select email from TeacherInfo where TeacherInfo.account = ReservationInfo.t_account), t_phone = (select phone from TeacherInfo where TeacherInfo.account = ReservationInfo.t_account) where t_name is null;"
     results, status = baser.insert_like(sql=sql_update)
     return results, status
 
@@ -108,7 +108,7 @@ def t_t_release_reservation(data):
     data: {
         account: ''
     }
-    
+
     :return 
         {
             status: '',
@@ -132,12 +132,13 @@ def t_t_release_reservation(data):
 
 def t_t_view_reservation(data):
     print('t_t_view_reservation data: ', data)
-    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished, concat(serial) as serial, concat(score) as score, concat(is_selected) as is_selected from ReservationInfo where t_account = '%s' and is_canceled != 3 and is_finished = 0 and s_account is not null;"
+    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished, concat(serial) as serial, concat(score) as score, concat(is_selected) as is_selected from ReservationInfo where t_account = '%s' and is_canceled != 3 and is_finished = 0;"
     baser = DatabaseDeal()
     temp_ress, status = baser.select(sql=sql % data['account'])
     ress = []
-    for i in range(0, temp_ress.shape[0]):
-        ress.append(temp_ress.iloc[i].to_dict())
+    if temp_ress is not None:
+        for i in range(0, temp_ress.shape[0]):
+            ress.append(temp_ress.iloc[i].to_dict())
     print('t view reservation ress: ', ress)
     return ress, status
 
@@ -177,7 +178,7 @@ def t_release_exam(data):
 
     if status == 200:
         # 更新，向表中插入姓名
-        sql_update = "update ExamInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ExamInfo.t_account), t_phone = (select phone from TeacherInfo where TeacherInfo.account = ExamInfo.t_account), t_email = (select email form TeacherInfo where TeacherInfo.account = ExamInfo.account) where t_name = '';"
+        sql_update = "update ExamInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ExamInfo.t_account) where t_name = '';"
         results, status = baser.insert_like(sql=sql_update)
     else:
         return results, status
@@ -257,8 +258,8 @@ def t_edit_exam(data):
     sql = "update ExamInfo set e_name = '%s', start = '%s', end = '%s', place = '%s', week = '%s', weekday = '%s', tips = '%s' where serial = '%s';"
     try:
         results, status = baser.insert_like(sql % (
-        data['e_name'], data['start'], data['end'], data['place'], data['week'], data['weekday'], data['tips'],
-        data['serial']))
+            data['e_name'], data['start'], data['end'], data['place'], data['week'], data['weekday'], data['tips'],
+            data['serial']))
     except Exception as e:
         results, status = None, 500
         print('t edit exam error!', e)

@@ -43,6 +43,10 @@ CREATE TABLE ReservationInfo (
     tips varchar(33) NULL default '',
     is_finished int NOT NULL DEFAULT 0,
     is_canceled int NOT NULL DEFAULT 0,
+    is_selected int not null default 0,
+    t_phone varchar(33) default '',
+    t_email varchar(33) default '',
+    score int not null default 5,
     UNIQUE INDEX ReservationInfo_ak_1 (t_account,week,weekday,segment),
     CONSTRAINT ReservationInfo_pk PRIMARY KEY (serial)
 );

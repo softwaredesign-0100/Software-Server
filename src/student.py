@@ -93,7 +93,7 @@ def s_s_submit_own_info(data):
 
 def s_seek_reservation(data):
     sql = "select week, weekday, segment, place, t_name, tips, concat(serial) as serial, concat(is_canceled) as is_canceled, " \
-          "concat(is_finished) as is_finished from ReservationInfo where s_account is null and is_canceled != '3';"
+          "concat(is_finished) as is_finished, t_phone, t_email from ReservationInfo where s_account is null and is_canceled != '3';"
     baser = DatabaseDeal()
     temp_ress, status = baser.select(sql=sql)
     print('temp_ress: ', temp_ress)
@@ -121,7 +121,8 @@ def s_seek_reservation(data):
 
 
 def s_s_release_reservation(data):
-    sql = "update ReservationInfo set s_account = '%s', reason = '%s' where serial = '%s';"
+    print('s_s_release_reservation data: ', data)
+    sql = "update ReservationInfo set s_account = '%s', reason = '%s', is_selected = 1 where serial = '%s';"
     baser = DatabaseDeal()
     results, status = baser.insert_like(sql=sql % (data['account'], data['reason'], data['serial']))
     if status == 201:
