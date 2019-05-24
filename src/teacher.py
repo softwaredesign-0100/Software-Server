@@ -122,6 +122,7 @@ def t_t_release_reservation(data):
                     reason: '答疑',
                     score: str,
                     tips: '',
+                    score: '',
                 },
                 ...
             ]
@@ -130,7 +131,8 @@ def t_t_release_reservation(data):
 
 
 def t_t_view_reservation(data):
-    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished, concat(serial) as serial, concat(score) as score from ReservationInfo where t_account = '%s' and is_canceled != 3 and is_finished = 0;"
+    print('t_t_view_reservation data: ', data)
+    sql = "select week, weekday, segment, s_name as student, place, reason, tips, concat(is_canceled) as is_canceled, concat(is_finished) as is_finished, concat(serial) as serial, concat(score) as score, concat(is_selected) as is_selected from ReservationInfo where t_account = '%s' and is_canceled != 3 and is_finished = 0 and s_account is not null;"
     baser = DatabaseDeal()
     temp_ress, status = baser.select(sql=sql % data['account'])
     ress = []
@@ -175,8 +177,10 @@ def t_release_exam(data):
 
     if status == 200:
         # 更新，向表中插入姓名
-        sql_update = "update ExamInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ExamInfo.t_account) where t_name = '';"
+        sql_update = "update ExamInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ExamInfo.t_account), t_phone = (select phone from TeacherInfo where TeacherInfo.account = ExamInfo.t_account), t_email = (select email form TeacherInfo where TeacherInfo.account = ExamInfo.account) where t_name = '';"
         results, status = baser.insert_like(sql=sql_update)
+    else:
+        return results, status
     print('t_release_exam status: ', status, '\n\tresults: ', results)
     return results, status
 

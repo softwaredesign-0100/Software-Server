@@ -5,7 +5,6 @@ from config import *
 import smtplib
 from email.mime.text import MIMEText
 
-
 '''
 :param
     data : {
@@ -59,7 +58,7 @@ def c_sign_in(data):
 
     sql_is_name = "select name from %s where account = '%s' and name is not null;"
     results, _ = baser.select(sql=sql_is_name % (map_table[data['identify']], data['account']))
-    
+
     if results.shape[0] == 0:
         status = 401
     else:
@@ -127,16 +126,21 @@ def c_initiate_cancel(data):
     if data['identify'] == 'student':
         is_canceled = 2
     else:
-        sql = "select s_name from ReservationInfo where serial = '%s';"
+        sql = "select s_account from ReservationInfo where serial = '%s';"
         results, status = baser.select(sql=sql % data['serial'])
-        if results.iloc[0]['s_name'] is None:
+        if results.iloc[0]['s_account'] is None:
             is_canceled = 3
+            sql_delete = "delete from ReservationInfo where serial = '%s'"
+            r_d, s_d = baser.insert_like(sql_delete % (data['serial']))
         else:
             is_canceled = 1
 
     # 更改状态
-    sql = "update ReservationInfo set is_canceled = '%s', reason = '%s' where serial = '%s';"
-    results, status = baser.insert_like(sql=sql % (is_canceled, data['reason'], data['serial']))
+    if is_canceled != 3:
+        sql = "update ReservationInfo set is_canceled = '%s', reason = '%s' where serial = '%s';"
+        results, status = baser.insert_like(sql=sql % (is_canceled, data['reason'], data['serial']))
+    else:
+        results, status = None, 200
     print('c initiate cancel: status = %d | is_canceled = %d' % (status, is_canceled))
 
     # 发送邮件
@@ -161,9 +165,17 @@ def c_initiate_cancel(data):
 
 
 def c_ensure_cancel(data):
-    print('c ensure cancel data: ', data)
-    sql = "update ReservationInfo set is_canceled = 3 where serial = '%s';"
     baser = DatabaseDeal()
+    print('c ensure cancel data: ', data)
+    # sql_select = "select concat(is_canceled) as is_canceled from ReservationInfo where serial = %d;"
+    # r_select, _ = baser.select(sql_select % int(data['serial']))
+    # # print('r_select: ', r_select)
+    # is_canceled = int(r_select.iloc[0]['is_canceled'])
+
+    if data['identify'] == 'teacher':
+        sql = "update ReservationInfo set is_canceled = 0, is_selected = 0, s_name = null, s_account = null where serial = '%s';"
+    if data['identify'] == 'student':
+        sql = "delete from ReservationInfo where serial = '%s';"
     results, status = baser.insert_like(sql=sql % (data['serial']))
     print('c ensure cancel status: ', status, 'results: ', results)
     return results, status
@@ -239,7 +251,7 @@ def c_verify_email(data):
     try:
         results, status = baser.insert_like(sql % (map_table[data['identify']], data['account']))
     except Exception as e:
-        print('update faile!', e)
+        print('update fail!', e)
         results, status = 0, 500
     return results, status
 
@@ -266,7 +278,7 @@ def c_get_verify_info(data):
     sql = "select email_verified as verify_email, phone_verified as verify_phone from '%s' where account = '%s';"
 
     try:
-        r, status = baser.select(sql=sql% (map_table[data['identify']], data['account']))
+        r, status = baser.select(sql=sql % (map_table[data['identify']], data['account']))
         results = {
             'verify_email': r.iloc[0]['verify_email'],
             'phone_verified': r.iloc[0]['phone_verified']
@@ -310,10 +322,10 @@ def c_get_verify_info(data):
 def c_view_his_res(data):
     print('c view his res data: ', data)
     baser = DatabaseDeal()
-    sql = "select week, weekday, segment, reason, tips, t_name, s_name, place, concat(serial) as serial, concat(score) as score" \
+    sql = "select week, weekday, segment, reason, tips, t_name, s_name, place, concat(serial) as serial, concat(score) as score " \
           "from ReservationInfo where %s = '%s' and is_finished = '1';"
     try:
-        r, status = baser.select(sql % (map_field[data['identify']],data['account']))
+        r, status = baser.select(sql % (map_field[data['identify']], data['account']))
         results = []
         for i in range(0, r.shape[0]):
             results.append(r.iloc[i].to_dict())
@@ -356,7 +368,7 @@ def c_delete_exam(data):
         sql = "delete from ExamInfo where t_account = '%s' and serial = '%s'"
 
     try:
-        results, status = baser.insert_like(sql% (data['account'], data['serial']))
+        results, status = baser.insert_like(sql % (data['account'], data['serial']))
     except Exception as e:
         print('c delete exam error!', e)
         results, status = None, 500
@@ -390,6 +402,7 @@ def c_finish_res(data):
     try:
         results, status = baser.insert_like(sql % (data['score'], data['serial']))
     except Exception as e:
-        print('s s finish res error!',  e)
+        print('s s finish res error!', e)
+        results, status = 0, 0
     print('s s finish res results: ', results, 'status: ', status)
     return results, status

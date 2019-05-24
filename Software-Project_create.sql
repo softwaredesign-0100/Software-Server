@@ -23,7 +23,7 @@ CREATE TABLE ExamInfo (
     week varchar(3) NOT NULL,
     weekday varchar(3) NOT NULL,
     tips varchar(99) NOT NULL,
-    UNIQUE INDEX ExamInfo_ak_1 (start,place),
+    UNIQUE INDEX ExamInfo_ak_1 (start,place, week, weekday),
     UNIQUE INDEX ExamInfo_ak_2 (e_name, t_account),
     CONSTRAINT ExamInfo_pk PRIMARY KEY (serial)
 );
