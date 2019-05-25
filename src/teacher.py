@@ -177,7 +177,7 @@ def t_release_exam(data):
 
     if status == 200:
         # 更新，向表中插入姓名
-        sql_update = "update ExamInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ExamInfo.t_account), t_phone = (select phone from TeacherInfo where TeacherInfo.account = ExamInfo.t_account), t_email = (select email form TeacherInfo where TeacherInfo.account = ExamInfo.account) where t_name = '';"
+        sql_update = "update ExamInfo set t_name = (select name from TeacherInfo where TeacherInfo.account = ExamInfo.t_account) where t_name = '';"
         results, status = baser.insert_like(sql=sql_update)
     else:
         return results, status

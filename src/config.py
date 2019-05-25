@@ -1,6 +1,6 @@
-host = '167.179.72.48'
+host = '127.0.0.1'
 user = 'root'
-password = 'root'
+password = '19980210'
 
 database = 'Software_Project'
 TeacherInfo = 'TeacherInfo'
